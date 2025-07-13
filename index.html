@@ -453,17 +453,22 @@ Project Manager</p>
     </div>
 
     <!-- ---------- tiny helper script to switch sections ---------- -->
-    <script>
+<script>
   function showSection(id) {
       document.querySelectorAll('.section')
               .forEach(s => s.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
   }
 
-  /* decide which tab to reveal after the page reloads */
-window.addEventListener('DOMContentLoaded', () => {
-    showSection('home');        /* always show home on static site */
-});
+  window.addEventListener('DOMContentLoaded', () => {
+    // If prediction_text is present, show predictor; else show home
+    const result = document.querySelector('.result');
+    if (result && result.textContent.trim() !== "") {
+      showSection('predictor');
+    } else {
+      showSection('home');
+    }
+  });
 </script>
 
 
