@@ -1,0 +1,18 @@
+trails
+| 
+|->node_modules{}
+|
+|->static
+|   |
+|   |->css->Particles.css
+|   |
+|   |->js->Particles.js
+|
+|->index.html
+|
+|->app.py
+|
+|->package-lock.json
+|->package.json
+|->structure
+|->diamonds.csv

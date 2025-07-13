@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: diamond-price-predictor
+    env: python
+    buildCommand: ""
+    startCommand: python app.py
+    plan: free

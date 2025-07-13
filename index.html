@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diamonds</title>
+
+    <!-- particle‑background styles -->
+    <link rel="stylesheet" href="static/css/Particles.css">
+
+    <!-- -------------- existing page styles -------------- -->
+    <style>
+        /* make body text visible on dark bg */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;           /* fallback if JS is off  */
+            color: #fff;
+        }
+        /* keep main UI above the background canvas          */
+        .navbar, .container { position: relative; z-index: 1; }
+
+        .navbar       { background:#ffffff; overflow:hidden; }
+        .navbar a     { float:left; display:block; color:#000000; text-align:center;
+                        padding:14px 20px; text-decoration:none; }
+        .navbar a:hover { background:#000000; color:#ffffff; }
+
+        .container    { padding:30px; max-width:800px; margin:auto; }
+        .box          { background:#111; padding:20px; border-radius:10px;
+                        box-shadow:0 0 10px #000; margin-bottom:30px; }
+        h2            { text-align:center; }
+        input, select { width:100%; padding:8px; margin:10px 0; color:#000; }
+        button        { width:100%; padding:10px; background:#4CAF50; color:#fff;
+                        border:none; cursor:pointer; background:#fff; color:#000; border:1px solid #000; transition:background 0.2s, color 0.2s; }
+.container #predictor button:hover {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff;
+}
+        .result       { text-align:center; margin-top:20px; font-weight:bold; }
+        .hidden       { display:none; }
+
+        /* simple team-card extras */
+        .profile         { display:flex; align-items:center; gap:15px; margin-bottom:15px; }
+        .profile img     { border-radius:50%; width:80px; height:80px; }
+        /* About Us grid for 2x2 layout */
+        .aboutus-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px 32px;
+            justify-items: stretch;
+            align-items: stretch;
+        }
+        @media (max-width: 700px) {
+            .aboutus-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+                /* 3D Diamond Home Layout */
+        .diamond-home-flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .diamond-side-text {
+            flex: 1 1 220px;
+            min-width: 180px;
+            max-width: 260px;
+            font-size: 1.05em;
+        }
+        .diamond-3d-center {
+            flex: 0 0 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 260px;
+        }
+        #diamond-3d-viewer {
+            width: 300px;
+            height: 300px;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        @media (max-width: 900px) {
+            .diamond-home-flex { flex-direction: column; gap: 18px; }
+            .diamond-3d-center { min-width: 180px; }
+            #diamond-3d-viewer { width: 220px; height: 220px; }
+        }
+    </style>
+
+    <!-- ---------- React & OGL (no build tools needed) ---------- -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- OGL (ESM) will be imported inside Particles.js -->
+    
+    <!-- Particles component (mounts itself on window.Particles) -->
+    <script type="module" src="static/js/Particles.js"></script>
+</head>
+
+<body>
+    <!-- background mount‑point (z‑index handled in the CSS file) -->
+    <div id="particles-bg" class="particles-container"></div>
+
+    <!-- ----------------- page content ----------------- -->
+    <div class="navbar">
+        <a href="#" onclick="showSection('home')">Home</a>
+        <a href="#" onclick="showSection('analysis')">Analysis</a>
+        <a href="#" onclick="showSection('predictor')">Price&nbsp;Predictor</a>
+        <a href="#" onclick="showSection('model')">About&nbsp;Model</a>
+        <a href="#" onclick="showSection('aboutus')">About&nbsp;Us</a>
+    </div>
+
+    <div class="container">
+        <!-- (all the original sections remain unchanged) -->
+
+        <!-- Home Section -->
+        <div id="home" class="section box">
+            <h2>Diamond </h2>
+            <div class="diamond-home-flex">
+                <div class="diamond-side-text diamond-left">
+                    <p style="text-align:left;">
+                        Diamonds are highly valued natural minerals made of pure carbon, formed deep within the Earth under immense heat and pressure over billions of years, and are renowned for being the hardest known natural substance. Their exceptional brilliance, fire, and durability make them prized gemstones for jewelry,  while their unparalleled hardness and thermal conductivity also make them indispensable in various industrial applications like cutting tools, abrasives, and high-performance electronics.
+                    </p>
+                </div>
+                <div class="diamond-3d-center">
+                    <div id="diamond-3d-viewer"></div>
+                </div>
+                <div class="diamond-side-text diamond-right">
+                    
+                </div>
+            </div>
+            <!-- Diamond characteristics below -->
+            <div style="display: flex; flex-direction: column; align-items: center; margin-top: 32px;">
+                <h3 style="color:#fff; margin-bottom: 16px; text-align:center;">Characteristics of Diamond</h3>
+                <div style="border-radius: 16px; padding: 18px 18px; background: rgba(0,0,0,0.7); font-size: 1.04em; text-align: left; max-width: 650px; color: #fff;">
+<strong>Carat:</strong> Refers to the weight of a diamond, measured in metric carats (1 carat = 200 milligrams). Higher carat weight often means a larger appearance and higher price, but value also depends on the other Cs.<br><br>
+<strong>Cut:</strong> The most critical factor for a diamond’s sparkle, describing how well its facets interact with light. It’s about proportions, symmetry, and polish, not shape. Grades range from Fair to Ideal, with an Ideal cut maximizing brilliance (white light), fire (rainbow colors), and scintillation (sparkle). A poor cut can dull even high-quality diamonds.<br><br>
+<strong>Color:</strong> Measures the absence of color in white diamonds, graded from D (colorless, rarest) to Z (light yellow/brown tint). D-F are colorless, enhancing brilliance, while slight tints (G-J) are less noticeable in jewelry but affect value.<br><br>
+<strong>Clarity:</strong> Evaluates the absence of inclusions (internal flaws) and blemishes (external imperfections), visible under 10x magnification. Grades include:<br>
+IF (Internally Flawless): No inclusions, minor blemishes.<br>
+VVS1/VVS2: Tiny inclusions, very hard to see.<br>
+VS1/VS2: Minor inclusions, slightly easier to detect.<br>
+SI1/SI2: Noticeable inclusions.<br>
+I1-I3: Obvious inclusions, potentially affecting transparency. Higher clarity (IF-VS2) boosts value by minimizing light obstruction.<br><br>
+<strong>Depth Percentage:</strong> The ratio of a diamond’s depth (from table to culet) to its average girdle diameter. Optimal depth ensures light reflects properly for maximum sparkle.<br><br>
+<strong>Table Percentage:</strong> The ratio of the table width (top flat facet) to the girdle diameter. A balanced table size enhances light entry and reflection.<br><br>
+<strong>x, y, z:</strong> The diamond’s dimensions in millimeters (length, width, depth). These confirm size, shape, and proportions, crucial for jewelry settings and light performance.
+                </div>
+                <h3 style="color:#fff; margin:32px 0 12px 0; text-align:center;">What is diamond price predictor?</h3>
+                <div style="border-radius: 16px; padding: 18px 18px; background: rgba(0,0,0,0.7); font-size: 1.04em; text-align: left; max-width: 650px; color: #fff;">
+                  A diamond price predictor is essentially a tool, often an online calculator or a more sophisticated machine learning model, that estimates the value or price of a diamond. It does this by taking into account the various characteristics of the diamond, primarily the "4 Cs" (Carat, Cut, Color, Clarity), and sometimes other factors.
+                </div>
+                <div style="margin-top: 22px; display: flex; justify-content: center;">
+                  <a href="#" onclick="showSection('predictor')" title="Go to Price Predictor" style="text-decoration:none; color:#fff; font-size:1.25em; font-weight:bold; padding:8px 28px; border-radius:8px; background:rgba(255,255,255,0.08); border:2px solid #fff; transition:background 0.2s; letter-spacing:1px;">
+                    <span style="font-weight:bold; letter-spacing:1px;">Predict now ↗</span>
+                  </a>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Three.js Diamond Viewer (module) -->
+    <script type="module">
+        import { mountDiamondViewer } from "./static/js/DiamondViewer.js";
+        window.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('diamond-3d-viewer');
+            if (el) {
+                mountDiamondViewer('diamond-3d-viewer', "./static/models/diamond.glb");
+            }
+        });
+    </script>
+
+        <!-- Analysis Section -->
+<div id="analysis" class="section box hidden">
+    <h2>Analysis</h2>
+    <p>Graphical representation of various characteristics such as carat vs price, color vs price, clarity distribution, etc.</p>
+    <!-- 3x2 grid for price vs 6 characteristics -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px 32px; justify-items: center; align-items: start;">
+        <!-- Row 1 -->
+        <div>
+            <img src="static/graphs/price vs carat.jpg" alt="Price vs Carat" style="max-width:100%; border-radius:8px; box-shadow:0 2px 8px #0008;">
+            <div style="margin-top:10px; font-size:0.98em;">
+                <strong>Price vs Carat:</strong> As carat increases, price rises sharply, showing a strong positive correlation. Larger diamonds are much more expensive.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/price vs cut.jpg" alt="Price vs Cut" style="max-width:100%; border-radius:8px; box-shadow:0 2px 8px #0008;">
+            <div style="margin-top:10px; font-size:0.98em;">
+                <strong>Price vs Cut:</strong> Diamonds with better cut grades (Ideal, Premium) tend to have higher prices, but the difference is moderate compared to carat.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/price vs colour.jpg" alt="Price vs Colour" style="max-width:100%; border-radius:8px; box-shadow:0 2px 8px #0008;">
+            <div style="margin-top:10px; font-size:0.98em;">
+                <strong>Price vs Colour:</strong> Colorless diamonds (D-F) are priced higher, while price decreases as color grade moves toward J (more yellow tint).
+            </div>
+        </div>
+        <!-- Row 2 -->
+        <div>
+            <img src="static/graphs/price vs clarity.jpg" alt="Price vs Clarity" style="max-width:100%; border-radius:8px; box-shadow:0 2px 8px #0008;">
+            <div style="margin-top:10px; font-size:0.98em;">
+                <strong>Price vs Clarity:</strong> Higher clarity grades (VVS1, VVS2) fetch higher prices, but the effect is less dramatic than carat or color.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/price vs depth.jpg" alt="Price vs Depth" style="max-width:100%; border-radius:8px; box-shadow:0 2px 8px #0008;">
+            <div style="margin-top:10px; font-size:0.98em;">
+                <strong>Price vs Depth:</strong> Price is highest for diamonds with optimal depth percentages; too shallow or too deep reduces value.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/price vs table.jpg" alt="Price vs Table" style="max-width:100%; border-radius:8px; box-shadow:0 2px 8px #0008;">
+            <div style="margin-top:10px; font-size:0.98em;">
+                <strong>Price vs Table:</strong> Diamonds with balanced table percentages are valued more; extreme values lower the price.
+            </div>
+        </div>
+    </div>
+    <!-- 4x1 grid for the rest of the graphs -->
+    <div style="display: flex; flex-direction: column; gap: 28px; margin-top: 32px;">
+        <div>
+            <img src="static/graphs/graph7.jpg" alt="Graph 7" style="width:100%; max-width:700px; border-radius:8px; box-shadow:0 2px 8px #0008; display:block; margin:auto;">
+            <div style="margin-top:10px; font-size:0.98em; text-align:center;">
+                <strong>Graph 7:</strong> Price and Carat Distributions: Both price and carat exhibit a right-skewed distribution, meaning most diamonds are concentrated at lower prices and carat weights, with fewer high-priced or high-carat diamonds.<br><br>
+                <strong>Price and Size Relationship:</strong><br>
+                Price vs. Carat (and x, y, z): There's a strong positive, non-linear relationship; as carat (and dimensions x, y, z) increases, the price generally increases, with the rate of price increase accelerating at higher values.<br>
+                Carat vs. x, y, z: A strong positive linear relationship exists, indicating that as carat weight increases, the physical dimensions (length, width, depth) of the diamond also increase proportionally.<br>
+                Inter-dimensional Relationship: The dimensions x, y, and z show very strong positive linear relationships with each other, meaning they grow together proportionally.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/graph8.jpg" alt="Graph 8" style="width:100%; max-width:700px; border-radius:8px; box-shadow:0 2px 8px #0008; display:block; margin:auto;">
+            <div style="margin-top:10px; font-size:0.98em; text-align:center;">
+                <strong>Graph 8:</strong> Strong Positive Correlations:<br>
+                Price is highly positively correlated with carat (0.92), x (0.89), y (0.87), and z (0.87). This is a very strong and expected trend: larger diamonds (higher carat) and larger physical dimensions (x, y, z) command higher prices.<br>
+                Carat is highly positively correlated with x (0.98), y (0.95), and z (0.96). This makes sense, as a higher carat weight generally corresponds to larger physical dimensions of the diamond.<br>
+                x, y, and z are highly positively correlated with each other (all close to 1.00). This is also expected as they represent the dimensions of the same object.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/graph9.jpg" alt="Graph 9" style="width:100%; max-width:700px; border-radius:8px; box-shadow:0 2px 8px #0008; display:block; margin:auto;">
+            <div style="margin-top:10px; font-size:0.98em; text-align:center;">
+                <strong>Graph 9:</strong> Color Impact: Average diamond prices generally decrease as color grade moves from D (colorless) towards J (faint yellow).<br>
+                Cut Impact: Diamonds with better cut grades (Fair &lt; Good &lt; Ideal &lt; Very Good &lt; Premium) consistently command higher average prices within each color grade.<br>
+                Premium Cut Dominance: 'Premium' cut diamonds often show the highest average prices, sometimes surpassing 'Very Good' or 'Ideal' cuts, especially for lower color grades (like I and J). This suggests that for diamonds with less desirable colors, a superior cut can be a significant price driver.
+            </div>
+        </div>
+        <div>
+            <img src="static/graphs/graph10.jpg" alt="Graph 10" style="width:100%; max-width:700px; border-radius:8px; box-shadow:0 2px 8px #0008; display:block; margin:auto;">
+            <div style="margin-top:10px; font-size:0.98em; text-align:center;">
+                <strong>Graph 10:</strong> Dominant Price-Carat Relationship: The most significant trend is that price strongly increases with carat weight.<br>
+                Limited Depth Influence: Diamond depth shows little direct influence on price; diamonds with similar carat weights can have varying depths without a clear systematic change in price.<br>
+                Data Density: Most diamonds are concentrated at lower carat weights and prices, with density decreasing as carat and price increase.<br>
+                Price Variability with Carat: The spread of prices widens at higher carat weights, suggesting that other factors (like color, clarity, or cut) have a greater impact on the price of larger diamonds.
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Price Predictor Section -->
+        <div id="predictor" class="section box hidden">
+            <h2>Diamond Price Predictor</h2>
+            <form method="post" action="https://diamond-price-predictor.onrender.com/predict">
+                <input type="number" step="0.01" name="carat"  placeholder="Carat"          required>
+                <select name="cut"  required>
+                    <option>Fair</option><option>Good</option><option>Very Good</option>
+                    <option>Premium</option><option>Ideal</option>
+                </select>
+                <select name="color" required>
+                    <option>D</option><option>E</option><option>F</option><option>G</option>
+                    <option>H</option><option>I</option><option>J</option>
+                </select>
+                <select name="clarity" required>
+                    <option>I1</option><option>SI2</option><option>SI1</option>
+                    <option>VS2</option><option>VS1</option><option>VVS2</option>
+                    <option>VVS1</option>
+                </select>
+                <input type="number" step="0.01" name="depth" placeholder="Depth (%)" required>
+                <input type="number" step="0.01" name="table" placeholder="Table (%)" required>
+                <input type="number" step="0.01" name="x"     placeholder="x length (mm)" required>
+                <input type="number" step="0.01" name="y"     placeholder="y width (mm)" required>
+                <input type="number" step="0.01" name="z"     placeholder="z depth (mm)" required>
+                <button type="submit">Predict&nbsp;Price</button>
+            </form>
+            <!-- Prediction result will not work in static HTML -->
+        </div>
+
+        <!-- About Model Section -->
+        <div id="model" class="section box hidden">
+            <h2>About Model</h2>
+            <p><strong>Model Used:</strong> Random Forest Regressor</p>
+            <p><strong>Libraries:</strong> pandas, numpy, scikit‑learn, matplotlib, seaborn</p>
+            <p><strong>Dataset:</strong> Thousands of real‑world diamond entries (carat, cut, color, clarity, …)</p>
+            <p><strong>Approach:</strong> Data preprocessing, feature encoding, model training, cross‑validation, and evaluation.</p>
+            <div style="margin-top:24px; background:rgba(0,0,0,0.7); border-radius:12px; padding:20px; color:#fff; font-size:1.05em;">
+<strong>My machine learning model for predicting diamond prices is built using a Random Forest Regressor, trained on a dataset from <code>test1.csv</code>. This model takes key diamond characteristics as input and outputs a predicted price, leveraging an ensemble approach to achieve accurate and robust results. Below, I’ll dive into the model’s core components, explain what makes the Random Forest Regressor effective, and detail how it processes data to deliver predictions.</strong><br><br>
+
+<strong>The Dataset: <code>test1.csv</code></strong><br>
+The model has been trained on the <code>test1.csv</code> dataset, which is rich in diamond attributes. Every row provides the following features:
+<ul>
+<li><strong>carat</strong>: The carat weight of the diamond, a key influencer of price.</li>
+<li><strong>cut</strong>: The cut quality of the diamond, a category feature with values such as 'Fair', 'Good', 'Very Good', 'Premium', and 'Ideal'.</li>
+<li><strong>color</strong>: The color grade of the diamond, from 'D' (colorless) to 'J' (slightly tinted), also categorical.</li>
+<li><strong>clarity</strong>: The diamond's clarity, reflecting imperfections, with categorical values such as 'I1', 'SI2', 'SI1', 'VS2', 'VS1', 'VVS2', and 'VVS1'.</li>
+<li><strong>depth</strong>: The depth percentage, which reflects the proportions of the diamond.</li>
+<li><strong>table</strong>: The relative width of the top facet to the widest facet, as a percentage.</li>
+<li><strong>x</strong>, <strong>y</strong>, <strong>z</strong>: The length, width, and depth of the diamond in millimeters.</li>
+<li><strong>price</strong>: The target variable, the price of the diamond in dollars, predicted by the model.</li>
+</ul>
+These attributes—numerical (carat, depth, table, x, y, z) and categorical (cut, color, clarity)—give an exhaustive description of every diamond, allowing the model to pick up intricate pricing patterns.<br><br>
+
+<strong>The Model: Random Forest Regressor</strong><br>
+The essence of my model is the <strong>Random Forest Regressor</strong>, an ensemble learning algorithm specifically designed for regression problems such as predicting continuous values (prices of diamonds). Let's decompose what it is and why it is well-suited for this problem.<br><br>
+
+<strong>What is a Random Forest Regressor?</strong><br>
+Random Forest Regressor is an ensemble that aggregates many decision trees for making predictions. A decision tree is a model that splits the data on feature values to predict an outcome. Individual trees are prone to overfitting, however, and learning the training data rather than new data in general. The Random Forest prevents this by:
+<ol>
+<li><strong>Building Multiple Trees</strong>: It constructs several trees (e.g., 200 in my case), each of which is trained on a random portion of the dataset and a random portion of features. There is randomness to ensure that trees are diverse from each other.</li>
+<li><strong>Average Prediction</strong>: For regression, the prediction from all trees is averaged to make the final prediction, minimizing noise and maximizing accuracy.</li>
+</ol>
+In my model, I configured:<br>
+<ul>
+<li><strong>n_estimators=100</strong>: The forest contains 100 trees for the balance between accuracy and computational cost.</li>
+<li><strong>max_depth=10</strong>: The depth of each tree is limited to 10 to avoid overfitting.</li>
+<li><strong>random_state=42</strong>: This will provide consistent results on runs for reproducibility.</li>
+</ul>
+
+<strong>Why Random Forest Regressor?</strong><br>
+I used the Random Forest Regressor due to its advantages:
+<ol>
+<li><strong>Handles Mixed Features</strong>: It treats both numerical and categorical features after encoding, making it ideal for my dataset.</li>
+<li><strong>Decreases Overfitting</strong>: Random data and feature sampling prevents overfitting, leading to stable predictions.</li>
+<li><strong>Detects Non-Linear Relationships</strong>: Prices of diamonds rely on complex interactions between features (e.g., carat and clarity). Random Forest is particularly good at learning these relationships.</li>
+<li><strong>Insight into Important Features</strong>: It is capable of determining significant features such as carat or clarity that influence price predictions, which helps with interpretability.</li>
+<li><strong>Low Hyperparameter Tuning Required</strong>: It works well with little hyperparameter tuning required, making it easy to develop.</li>
+</ol>
+
+<strong>Data Preprocessing: Preparing Inputs</strong><br>
+To preprocess the dataset in a form compatible with the Random Forest Regressor, I proceed with caution:<br><br>
+
+<strong>Encoding Categorical Features</strong><br>
+As the model demands numerical inputs, I employ <strong>LabelEncoder</strong> to encode categorical features:
+<ul>
+<li><strong>cut</strong>: Maps 'Fair' to 0, 'Good' to 1, and so on.</li>
+<li><strong>color</strong>: Maps 'D' to 0, 'E' to 1, and so on.</li>
+<li><strong>clarity</strong>: Encodes 'I1' as 0, 'SI2' as 1, and so on.</li>
+</ul>
+This encoding allows the model to handle categorical data, albeit under the ordinal relationship assumption, which is sufficient for this application.<br><br>
+
+<strong>Dealing with Unseen Categories</strong><br>
+To ensure the model's resilience to new input, I used an <code>encode_category</code> function. When a new category (e.g., an untested cut type) is reached during prediction, it falls back on the encoding of an established category (e.g., 'Fair' for cut, 'D' for color, 'I1' for clarity). This avoids errors and guarantees seamless predictions.<br><br>
+
+<strong>Numerical Features</strong><br>
+Numerical attributes (carat, depth, table, x, y, z) are taken directly since they're in the right format. I sanitize these inputs to detect invalid values (like negative carat) prior to passing them to the model.<br><br>
+
+<strong>How the Model Makes Predictions</strong><br>
+After training, the model makes diamond price predictions as follows:
+<ol>
+<li><strong>Input Collection</strong>: Takes carat, cut, color, clarity, depth, table, x, y, and z values.</li>
+<li><strong>Categorical Encoding</strong>: Maps cut, color, and clarity into numeric values with the trained LabelEncoders, failing over to unknown categories.</li>
+<li><strong>Feature Vector Creation</strong>: Merges encoded categorical features and numeric features into one array.</li>
+<li><strong>Prediction</strong>: Sends the feature vector through the Random Forest Regressor, which combines predictions from its 100 trees to provide a single price.</li>
+<li><strong>Output Formatting</strong>: The forecast price is formatted as a currency string (e.g., "$4,500.00") for readability.</li>
+</ol>
+
+<strong>Model Deployment</strong><br>
+The model is deployed in a Flask web application so users can provide diamond features and get predictions. The Flask app:
+<ul>
+<li><strong>Renders a Form</strong>: Renders a form (through <code>index.html</code>) for users to fill in diamond features.</li>
+<li><strong>Processes Inputs</strong>: Processes form submission, preprocesses, and invokes the model for the prediction.</li>
+<li><strong>Displays Results</strong>: Displays the predicted price to the user, with error handling for non-numeric inputs.</li>
+</ul>
+
+<strong>Advantages of the Model</strong><br>
+My Random Forest Regressor model is strong because:
+<ul>
+<li><strong>High Accuracy</strong>: It learns intricate pricing trends, providing trustworthy predictions.</li>
+<li><strong>Stability</strong>: Randomization and depth constraints avoid overfitting, making it generalize well.</li>
+<li><strong>Versatility</strong>: It supports varied feature types and handles novel categories elegantly.</li>
+<li><strong>Efficiency</strong>: At 100 trees, it has a good balance between speed and accuracy for real-time prediction.</li>
+</ul>
+
+
+<strong>Model Evaluation Metrics</strong><br>
+To provide transparency and insight into the model's performance, here are the key evaluation metrics computed on the test set:
+<ul>
+    <li><strong>Mean Squared Error (MSE):</strong> [static value]</li>
+    <li><strong>Root Mean Squared Error (RMSE):</strong> [static value]</li>
+    <li><strong>Mean Absolute Error (MAE):</strong> [static value]</li>
+    <li><strong>R² Score:</strong> [static value]</li>
+    <li><strong>Mean Absolute Percentage Error (MAPE):</strong> [static value]%</li>
+</ul>
+
+<strong>Conclusion</strong><br>
+My Random Forest Regressor model, tuned using the <code>test1.csv</code> dataset, is a strong predictive tool for diamond prices. By utilizing ensemble learning, prudent preprocessing, and strategic tuning, it effectively predicts prices from varied diamond features. Combined into a Flask app, the model is deployed for practical use, leaving scope to further strengthen it.
+            </div>
+        </div>
+
+        <!-- About Us Section -->
+        <div id="aboutus" class="section box hidden">
+            <h2>About Us</h2>
+            <div class="aboutus-grid">
+                <div class="profile">
+                    <div>
+                        <p><strong>Name:</strong> Rayudu Somi Setty</p>
+                        <p><strong>Role:</strong>Core Graphics Engine Development
+WebGL Developer / Graphics Engineer,
+3D Scene and Object Management
+3D Scene Developer / Engine User, Full stack developer</p>
+                        <p><strong>Specialization:</strong> Full stack, AI & ML Engineer</p>
+                        <p><strong>Contact:</strong> srayudu3@gitam.in</p>
+                    </div>
+                </div>
+                <div class="profile">
+                    <div>
+                        <p><strong>Name:</strong>Aganti Bhuvana Karthik</p>
+                        <p><strong>Role:</strong>Asset Pipeline and Loading
+Asset Loader Developer (GLTF/KTX/Basis/Draco),
+ Animation and Interactivity
+Animation Developer, Frontend Developer</p>
+                        <p><strong>Specialization:</strong>AI & ML Engineer</p>
+                        <p><strong>Contact:</strong>baganti@gitam.in</p>
+                    </div>
+                </div>
+                <div class="profile">
+                    <div>
+                        <p><strong>Name:</strong> Marpu Raja</p>
+                        <p><strong>Role:</strong>Specialized Graphics Features
+Post-Processing Effects Developer,Project Management and Support
+Project Manager</p>
+                        <p><strong>Specialization:</strong>AI & ML Engineer</p>
+                        <p><strong>Contact:</strong>rmarpu@gitam.in</p>
+                    </div>
+                </div>
+                <div class="profile">
+                    <div>
+                        <p><strong>Name:</strong>Nagothi Madhumitha</p>
+                        <p><strong>Role:</strong>Specialized Graphics Features
+Post-Processing Effects Developer,Project Management and Support
+Project Manager</p>
+                        <p><strong>Specialization:</strong>AI & ML Engineer</p>
+                        <p><strong>Contact:</strong>mnagothi2@gitam.in</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ---------- tiny helper script to switch sections ---------- -->
+    <script>
+  function showSection(id) {
+      document.querySelectorAll('.section')
+              .forEach(s => s.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+  }
+
+  /* decide which tab to reveal after the page reloads */
+window.addEventListener('DOMContentLoaded', () => {
+    showSection('home');        /* always show home on static site */
+});
+</script>
+
+
+    <!-- ---------- mount the Particles background after DOM ready ---------- -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const root = ReactDOM.createRoot(document.getElementById('particles-bg'));
+            root.render(
+                React.createElement(window.Particles, {
+                    particleColors: ['#ffffff', '#ffffff'],
+                    particleCount: 200,
+                    particleSpread: 10,
+                    speed: 0.1,
+                    particleBaseSize: 100,
+                    moveParticlesOnHover: true,
+                    alphaParticles: false,
+                    disableRotation: false
+                })
+            );
+        });
+    </script>
+</body>
+</html> 
+
+

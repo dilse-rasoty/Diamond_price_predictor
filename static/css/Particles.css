@@ -1,0 +1,9 @@
+/* full‑screen canvas that sits *behind* every other element */
+.particles-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;          /* keeps it in the background */
+  overflow: hidden;
+}
