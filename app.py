@@ -58,6 +58,7 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    import traceback
     try:
         carat = float(request.form['carat'])
         cut = request.form['cut']
@@ -79,6 +80,7 @@ def predict():
 
         return render_template('index.html', prediction_text=f"Predicted Diamond Price: {predicted_price}", model_metrics=model_metrics)
     except Exception as e:
+        print(traceback.format_exc())  # Print full error to logs for debugging
         return render_template('index.html', prediction_text=f"Error: {str(e)}", model_metrics=model_metrics)
 
 if __name__ == "__main__":
