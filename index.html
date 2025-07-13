@@ -283,8 +283,12 @@ I1-I3: Obvious inclusions, potentially affecting transparency. Higher clarity (I
                 <input type="number" step="0.01" name="y"     placeholder="y width (mm)" required>
                 <input type="number" step="0.01" name="z"     placeholder="z depth (mm)" required>
                 <button type="submit">Predict&nbsp;Price</button>
+        
             </form>
             <!-- Prediction result will not work in static HTML -->
+            <div class="result">
+                {{ prediction_text }}
+            </div>
         </div>
 
         <!-- About Model Section -->
